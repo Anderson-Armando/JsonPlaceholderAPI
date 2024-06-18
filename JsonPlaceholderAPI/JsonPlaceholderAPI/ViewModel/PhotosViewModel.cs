@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using JsonPlaceholderAPI.Model;
+using System.Net.Http;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,7 +15,7 @@ namespace JsonPlaceholderAPI.ViewModel
     public partial class PhotosViewModel : ObservableObject
     {
         [ObservableProperty]
-        private ObservableCollection<PhotoModel> _photos;
+        private ObservableCollection<PhotoModel> photos;
 
         public PhotosViewModel()
         {
@@ -30,11 +31,20 @@ namespace JsonPlaceholderAPI.ViewModel
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    _photos = JsonSerializer.Deserialize<ObservableCollection<PhotoModel>>(json);
-                    foreach (var photo in _photos)
+                    var photoList = JsonSerializer.Deserialize<List<PhotoModel>>(json);
+
+                    // Adicionando apenas as primeiras 10 fotos
+                    foreach (var photo in photoList.Take(10))
                     {
                         Photos.Add(photo);
                     }
+
+                    // Mensagem de console para depuração
+                    Console.WriteLine("Fotos carregadas: " + Photos.Count);
+                }
+                else
+                {
+                    Console.WriteLine("Erro ao carregar fotos: " + response.StatusCode);
                 }
             }
         }
